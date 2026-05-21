@@ -1,0 +1,17 @@
+# Executar como Administrador
+Write-Host "⛔ Desabilitando tecla Print Screen para Snipping Tool..." -ForegroundColor Cyan
+
+# Caminho do registro
+$regPath = "HKCU:\Control Panel\Keyboard"
+
+# Cria a chave se não existir
+if (-not (Test-Path $regPath)) {
+    New-Item -Path "HKCU:\Control Panel\Keyboard" -Force
+}
+
+# Desativa o atalho Print Screen
+Set-ItemProperty -Path $regPath -Name "PrintScreenKeyForSnippingEnabled" -Value 0
+
+# Confirmação
+Write-Host "✅ Tecla Print Screen desvinculada do Snipping Tool." -ForegroundColor Green
+Write-Host "🔁 É necessário sair e entrar novamente ou reiniciar para aplicar a mudança." -ForegroundColor Yellow

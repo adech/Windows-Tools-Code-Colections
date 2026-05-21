@@ -1,0 +1,45 @@
+# Executar como Administrador!
+
+Write-Host "`n==== INICIANDO LIMPEZA E FLUSH DNS ====" -ForegroundColor Cyan
+
+# Limpar histórico de arquivos recentes
+Remove-Item "$env:APPDATA\Microsoft\Windows\Recent\*" -Force -ErrorAction SilentlyContinue
+
+# Limpar arquivos temporários do usuário
+Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:USERPROFILE\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Limpar arquivos temporários do sistema
+Start-Process cleanmgr -ArgumentList "/sagerun:1" -Wait
+
+# Limpar cache do Internet Explorer e Microsoft Edge
+RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255
+
+# Limpar cache do Google Chrome
+$chromeCache = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache"
+$chromeCodeCache = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Code Cache"
+$chromeGPUCache = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\GPUCache"
+$chromeTempFiles = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Media Cache"
+
+Remove-Item "$chromeCache\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$chromeCodeCache\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$chromeGPUCache\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$chromeTempFiles\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Flush DNS e reinício de rede
+ipconfig /flushdns
+ipconfig /registerdns
+ipconfig /release
+ipconfig /renew
+
+# Reiniciar serviços de rede
+Restart-Service -Name "Dnscache" -ErrorAction SilentlyContinue
+Restart-Service -Name "NlaSvc" -ErrorAction SilentlyContinue
+Restart-Service -Name "Netman" -ErrorAction SilentlyContinue
+
+# Limpar cache do Windows Update
+Stop-Service -Name wuauserv -Force
+Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+Start-Service -Name wuauserv
+
+Write-Host "`n==== TUDO FINALIZADO COM SUCESSO ====" -ForegroundColor Green

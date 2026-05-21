@@ -1,0 +1,39 @@
+# Cria lista para armazenar o relatório
+$saida = @()
+
+# == MEMÓRIA RAM ==
+Get-CimInstance Win32_PhysicalMemory | ForEach-Object {
+    $saida += "Banco de Memória: $($_.BankLabel) | Fabricante: $($_.Manufacturer) | Modelo: $($_.PartNumber) | Velocidade: $($_.Speed) MHz | Capacidade: $([math]::Round($_.Capacity / 1GB, 2)) GB"
+}
+
+# == SLOTS DE MEMÓRIA ==
+$slotsTotal = (Get-CimInstance Win32_PhysicalMemoryArray).MemoryDevices
+$slotsUsados = (Get-CimInstance Win32_PhysicalMemory).Count
+$saida += "Slots totais: $slotsTotal | Em uso: $slotsUsados"
+
+# == PROCESSADOR ==
+$saida += "---------------------------------------------"
+$cpu = Get-CimInstance Win32_Processor
+$saida += "Modelo do Processador: $($cpu.Name) | Fabricante: $($cpu.Manufacturer) | Núcleos: $($cpu.NumberOfCores) | Clock Máx: $($cpu.MaxClockSpeed) MHz"
+
+# == PLACA-MÃE ==
+$saida += "---------------------------------------------"
+$mb = Get-CimInstance Win32_BaseBoard
+$saida += "Placa Mâe: $($mb.Manufacturer) | Modelo: $($mb.Product) | Serial: $($mb.SerialNumber) | Slots de memória suportados: $slotsTotal"
+
+# == NOME DO COMPUTADOR E USUÁRIO ==
+$sys = Get-CimInstance Win32_ComputerSystem
+$saida += "---------------------------------------------"
+$saida += "Nome da máquina: $($sys.Name) | Usuário atual: $($sys.UserName)"
+
+# CAMINHO DO ARQUIVO DE SAÍDA
+$arquivo = "C:\Temp\info_hardware.txt"
+
+# Garante que a pasta C:\Temp existe
+if (!(Test-Path "C:\Temp")) { New-Item -Path "C:\" -Name "Temp" -ItemType Directory }
+
+# Salva no arquivo
+$saida | Out-File -FilePath $arquivo -Encoding UTF8
+
+# Confirmação
+Write-Host "`n✅ Relatório salvo com sucesso em: $arquivo" -ForegroundColor Green

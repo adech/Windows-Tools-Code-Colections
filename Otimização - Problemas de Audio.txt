@@ -1,0 +1,21 @@
+# Executar como administrador
+
+# 1. Ativar plano de energia Alto desempenho
+powercfg -setactive SCHEME_MIN
+
+# 2. Reiniciar serviços de áudio
+Restart-Service -Name Audiosrv -Force
+Restart-Service -Name AudioEndpointBuilder -Force
+
+# 3. Desativar efeitos sonoros (padrão)
+$audioDevice = Get-CimInstance Win32_SoundDevice  Select-Object -First 1
+if ($audioDevice) {
+    Write-Host Dispositivo de áudio detectado $($audioDevice.Name)
+    Write-Host Para desativar efeitos sonoros, vá em Painel de Controle  Som  Propriedades  Aprimoramentos.
+    Write-Host Este script não altera diretamente isso por segurança.
+} else {
+    Write-Host Nenhum dispositivo de áudio detectado.
+}
+
+# 4. Aviso para atualizar driver
+Write-Host Recomenda-se verificar atualizações do driver de áudio pelo Gerenciador de Dispositivos ou baixar do site do fabricante.

@@ -1,0 +1,42 @@
+# Define título da janela
+$host.UI.RawUI.WindowTitle = "Reparo Completo do Sistema - DISM + SFC"
+
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host "    Iniciando Reparo Completo do Windows" -ForegroundColor Yellow
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Etapa 1: CheckHealth
+Write-Host "Etapa 1: Verificando integridade da imagem do Windows..." -ForegroundColor White
+Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /CheckHealth" -Wait
+
+Write-Host ""
+
+# Etapa 2: ScanHealth
+Write-Host "Etapa 2: Verificando se há problemas na imagem..." -ForegroundColor White
+Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /ScanHealth" -Wait
+
+Write-Host ""
+
+# Etapa 3: RestoreHealth
+Write-Host "Etapa 3: Reparando a imagem do Windows (pode demorar)..." -ForegroundColor White
+Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /RestoreHealth" -Wait
+
+Write-Host ""
+Write-Host "=========================================" -ForegroundColor Green
+Write-Host "     DISM concluído com sucesso!" -ForegroundColor Green
+Write-Host "=========================================" -ForegroundColor Green
+Write-Host ""
+
+# Etapa 4: SFC
+Write-Host "Etapa 4: Verificando e reparando arquivos do sistema com SFC..." -ForegroundColor White
+Start-Process sfc.exe -ArgumentList "/scannow" -Wait
+
+Write-Host ""
+Write-Host "=========================================" -ForegroundColor Green
+Write-Host " Verificações e Reparos concluídos!" -ForegroundColor Green
+Write-Host "=========================================" -ForegroundColor Green
+Write-Host ""
+
+# Aguarda o usuário pressionar uma tecla
+Read-Host -Prompt "Pressione [Enter] para sair"

@@ -1,0 +1,31 @@
+# ⚠ Execute como Administrador
+
+# Caminho padrão de instalação do Camtasia (ajuste se estiver diferente)
+$caminhos = @(
+    "$Env:C:\Program Files (x86)\TechSmith\Camtasia Studio 7\CamtasiaStudio.exe",
+    "$Env:C:\Program Files (x86)\TechSmith\Camtasia Studio 7\CamRecorder.exe",
+    "$Env:C:\Program Files (x86)\TechSmith\Camtasia Studio 7\CamMenuPlayer.exe",
+    "$Env:C:\Program Files (x86)\TechSmith\Camtasia Studio 7\CamMenuMaker.exe"
+)
+
+# Nome base para as regras
+$nomeRegra = "Bloqueio Camtasia"
+
+# Função para criar regras de firewall
+foreach ($exe in $caminhos) {
+    if (Test-Path $exe) {
+        Write-Host "🔒 Bloqueando: $exe" -ForegroundColor Yellow
+
+        # Regra de Saída
+        New-NetFirewallRule -DisplayName "$nomeRegra - Saída - $($exe.Split('\')[-1])" `
+            -Direction Outbound -Program $exe -Action Block -Profile Any
+
+        # Regra de Entrada
+        New-NetFirewallRule -DisplayName "$nomeRegra - Entrada - $($exe.Split('\')[-1])" `
+            -Direction Inbound -Program $exe -Action Block -Profile Any
+    } else {
+        Write-Host "⚠️ Caminho não encontrado: $exe" -ForegroundColor Red
+    }
+}
+
+Write-Host "`n✅ Regras de firewall aplicadas com sucesso." -ForegroundColor Green

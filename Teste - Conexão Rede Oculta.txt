@@ -1,0 +1,74 @@
+# ============================
+# CONFIGURAÇÕES DA REDE
+# ============================
+$ssid = "SSID"  #SSID
+$key = "SENHA_DA_REDE"         # Senha da rede
+$profileName = $ssid            # Nome do perfil salvo
+$xmlPath = "$env:TEMP\$ssid-profile.xml"
+
+# ============================
+# GERAR ARQUIVO XML DO PERFIL
+# ============================
+$xmlContent = @"
+<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>$ssid</name>
+    <SSIDConfig>
+        <SSID>
+            <name>$ssid</name>
+        </SSID>
+        <nonBroadcast>true</nonBroadcast>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>WPA2PSK</authentication>
+                <encryption>AES</encryption>
+                <useOneX>false</useOneX>
+            </authEncryption>
+            <sharedKey>
+                <keyType>passPhrase</keyType>
+                <protected>false</protected>
+                <keyMaterial>$key</keyMaterial>
+            </sharedKey>
+        </security>
+    </MSM>
+</WLANProfile>
+"@
+
+$xmlContent | Out-File -Encoding UTF8 -FilePath $xmlPath
+
+# ============================
+# ADICIONAR PERFIL
+# ============================
+Write-Host "📡 Criando perfil da rede oculta..." -ForegroundColor Cyan
+netsh wlan add profile filename="$xmlPath" user=all | Out-Null
+
+# ============================
+# TENTAR CONECTAR
+# ============================
+Write-Host "🔌 Tentando conectar à rede oculta '$ssid'..." -ForegroundColor Cyan
+netsh wlan connect name="$profileName" ssid="$ssid" | Out-Null
+
+Start-Sleep -Seconds 30  # Espera alguns segundos pela conexão
+
+# ============================
+# VERIFICAR STATUS DA CONEXÃO
+# ============================
+$conexao = netsh wlan show interfaces | Select-String "SSID\s+:\s+(.*)" | ForEach-Object {
+    ($_ -match "SSID\s+:\s+(.*)") | Out-Null
+    $matches[1].Trim()
+}
+
+if ($conexao -eq $ssid) {
+    Write-Host "`n✅ Conectado com sucesso à rede '$ssid'" -ForegroundColor Green
+} else {
+    Write-Host "`n❌ Falha ao conectar à rede '$ssid'. Verifique o SSID, senha ou alcance da rede." -ForegroundColor Red
+}
+
+# ============================
+# LIMPAR PERFIL XML TEMPORÁRIO
+# ============================
+Remove-Item $xmlPath -Force -ErrorAction SilentlyContinue

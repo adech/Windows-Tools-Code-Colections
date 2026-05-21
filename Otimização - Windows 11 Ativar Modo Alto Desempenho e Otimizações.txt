@@ -1,0 +1,35 @@
+# Executar como administrador!
+
+Write-Host "⏳ Aplicando plano de energia Alto Desempenho..." -ForegroundColor Cyan
+
+# Ativar plano de Alto Desempenho
+$highPerf = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+powercfg -duplicatescheme $highPerf | Out-Null
+powercfg -setactive $highPerf
+
+Write-Host "⚙️ Ajustando configurações avançadas..." -ForegroundColor Yellow
+
+# Desativar desligamento de disco rígido (AC e DC)
+powercfg -setacvalueindex $highPerf SUB_DISK DISKIDLE 0
+powercfg -setdcvalueindex $highPerf SUB_DISK DISKIDLE 0
+
+# Desligar suspensão do sistema (AC e DC)
+powercfg -setacvalueindex $highPerf SUB_SLEEP STANDBYIDLE 0
+powercfg -setdcvalueindex $highPerf SUB_SLEEP STANDBYIDLE 0
+
+# Desativar suspensão híbrida
+powercfg -setacvalueindex $highPerf SUB_SLEEP HYBRIDSLEEP 0
+powercfg -setdcvalueindex $highPerf SUB_SLEEP HYBRIDSLEEP 0
+
+# Desativar hibernação completamente
+powercfg /hibernate off
+
+# Processador em desempenho máximo
+powercfg -setacvalueindex $highPerf SUB_PROCESSOR PROCTHROTTLEMAX 100
+powercfg -setacvalueindex $highPerf SUB_PROCESSOR PROCTHROTTLEMIN 100
+powercfg -setacvalueindex $highPerf SUB_PROCESSOR PERFBOOSTMODE 2
+
+# Ativar plano novamente para aplicar mudanças
+powercfg -setactive $highPerf
+
+Write-Host "✅ Configuração de desempenho aplicada com sucesso!" -ForegroundColor Green

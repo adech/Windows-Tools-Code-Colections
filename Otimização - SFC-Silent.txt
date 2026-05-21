@@ -1,0 +1,16 @@
+@echo off
+:: Cria um script PowerShell temporário
+set PSFile=%TEMP%\ReparoSilent.ps1
+
+echo Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /CheckHealth" -WindowStyle Hidden -Wait >> %PSFile%
+echo Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /ScanHealth" -WindowStyle Hidden -Wait >> %PSFile%
+echo Start-Process DISM.exe -ArgumentList "/Online /Cleanup-Image /RestoreHealth" -WindowStyle Hidden -Wait >> %PSFile%
+echo Start-Process SFC.exe -ArgumentList "/scannow" -WindowStyle Hidden -Wait >> %PSFile%
+
+:: Executa o PowerShell de forma oculta
+powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "%PSFile%"
+
+:: Limpa o arquivo temporário criado
+del "%PSFile%"
+
+exit

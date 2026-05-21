@@ -1,0 +1,23 @@
+# Informações da Memória RAM
+"== MEMÓRIA RAM =="
+Get-CimInstance -ClassName Win32_PhysicalMemory | Select-Object BankLabel, Manufacturer, PartNumber, Speed, Capacity
+
+# Informações do Processador
+"== PROCESSADOR =="
+Get-CimInstance -ClassName Win32_Processor | Select-Object Name, Manufacturer, NumberOfCores, MaxClockSpeed
+
+# Informações da Placa-mãe
+"== PLACA-MÃE =="
+$board = Get-CimInstance -ClassName Win32_BaseBoard | Select-Object Manufacturer, Product, SerialNumber
+$slots = (Get-CimInstance Win32_PhysicalMemoryArray).MemoryDevices
+
+$board | Add-Member -NotePropertyName "TotalSlotsDeMemória" -NotePropertyValue $slots -Force
+$board
+
+# Informações do Nome da Maquina
+"== NOME DA MÁQUINA =="
+Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Name
+
+# Informações do Usuário Atual
+"== USUÁRIO ATUAL =="
+Get-CimInstance -Class Win32_ComputerSystem | Select-Object UserName

@@ -1,0 +1,35 @@
+# Executar como Administrador
+Write-Host "🔹 Iniciando desinstalação dos softwares Dell..." -ForegroundColor Cyan
+
+# Lista de nomes parciais dos softwares Dell
+$dellApps = @(
+    "Dell Command | Update for Windows Universal",
+    "Dell Core Services",
+    "Dell Digital Delivery Services",
+    "Dell Display Manager",
+    "Dell Optimizer Core",
+    "Dell Peripheral Manager",
+    "Dell Power Manager Service",
+    "Dell SupportAssist",
+    "Dell SupportAssist OS Recovery Plugin for Dell Update",
+    "Dell SupportAssist Remediation"
+)
+
+foreach ($app in $dellApps) {
+    # Buscar o produto instalado
+    $product = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like "*$app*" }
+    
+    if ($product) {
+        Write-Host "Desinstalando: $($product.Name)" -ForegroundColor Yellow
+        try {
+            $product.Uninstall()
+            Write-Host "✅ Desinstalado com sucesso: $($product.Name)" -ForegroundColor Green
+        } catch {
+            Write-Host "❌ Erro ao desinstalar: $($product.Name)" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "⚠️ Não encontrado: $app" -ForegroundColor DarkGray
+    }
+}
+
+Write-Host "🏁 Processo concluído." -ForegroundColor Cyan

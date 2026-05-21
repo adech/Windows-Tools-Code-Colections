@@ -1,0 +1,39 @@
+# Desativa serviços desnecessários para VM
+Stop-Service -Name 'DiagTrack','WSearch','SysMain' -Force
+Set-Service -Name 'DiagTrack','WSearch','SysMain' -StartupType Disabled
+
+# Remove apps desnecessários
+Get-AppxPackage xbox | Remove-AppxPackage
+Get-AppxPackage people | Remove-AppxPackage
+Get-AppxPackage zune | Remove-AppxPackage
+Get-AppxPackage solitaire | Remove-AppxPackage
+Get-AppxPackage getstarted | Remove-AppxPackage
+Get-AppxPackage bing | Remove-AppxPackage
+Get-AppxPackage skype | Remove-AppxPackage
+Get-AppxPackage officehub | Remove-AppxPackage
+Get-AppxPackage maps | Remove-AppxPackage
+
+# Ajusta para alto desempenho
+powercfg -setactive SCHEME_MIN
+
+# Desativa efeitos visuais para desempenho
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00))
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "VisualFXSetting" -Value 2
+
+# Desativa transparências e animações
+New-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -PropertyType DWord -Value 0 -Force
+New-ItemProperty "HKCU:\Control Panel\Desktop" -Name "WindowMetrics" -PropertyType String -Value 0 -Force
+
+# Desativa notificações
+New-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -PropertyType DWord -Value 0 -Force
+
+# Ajusta inicialização e disco
+bcdedit /set useplatformclock yes
+bcdedit /set disabledynamictick yes
+
+# Limpa arquivos temporários
+Remove-Item -Path "$env:TEMP\*" -Force -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\Windows\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
+
+# Finaliza
+Write-Host "Otimização concluída! Reinicie a máquina virtual." -ForegroundColor Green

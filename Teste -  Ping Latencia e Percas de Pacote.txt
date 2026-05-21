@@ -1,0 +1,26 @@
+# Define o host de destino
+$destino = "milvus.com.br"
+
+Write-Host "🌐 Testando conexão com: $destino" -ForegroundColor Cyan
+Write-Host "Enviando 10 pacotes ICMP..." -ForegroundColor Cyan
+Write-Host "----------------------------------------`n"
+
+# Executa o teste de ping (10 pacotes)
+$pingResult = Test-Connection -ComputerName $destino -Count 10 -ErrorAction SilentlyContinue
+
+if ($pingResult) {
+    $avgTime = ($pingResult | Measure-Object -Property ResponseTime -Average).Average
+    $lossPercent = 100 - ($pingResult.Count / 10 * 100)
+
+    Write-Host "🏁 Resultados:" -ForegroundColor Green
+    Write-Host "Pacotes enviados: 10"
+    Write-Host "Pacotes recebidos: $($pingResult.Count)"
+    Write-Host ("Perda de pacotes: {0:N1}%%" -f $lossPercent)
+    Write-Host ("Latência média: {0:N2} ms" -f $avgTime)
+} else {
+    Write-Host "❌ Falha na conexão. Nenhuma resposta recebida." -ForegroundColor Red
+}
+
+# Mantém a janela aberta até o usuário pressionar uma tecla
+Write-Host "`nPressione qualquer tecla para sair..." -ForegroundColor Yellow
+[void][System.Console]::ReadKey($true)

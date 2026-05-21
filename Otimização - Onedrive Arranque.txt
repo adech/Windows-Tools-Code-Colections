@@ -1,0 +1,15 @@
+Boa tarde tudo bem?
+
+
+
+Foi realizado processo de otimização do plano de energia, foi configurado a memória de paginação, foi desabilitado alguns programas desnecessários da inicialização.
+
+Foi realizada a desativação do serviço de indexação do Windows, Windows Search
+
+Foi executado o comando no Powershell para priorizar o Excel, sharepoint e Onedrive:
+
+
+$appList = @("onedrive.exe", "Microsoft.SharePoint.exe", "excel.exe")
+foreach ($app in $appList) {
+    Start-Process powershell -ArgumentList "-Command `"`"wmic process where name='$app' CALL setpriority 128`"`""
+}

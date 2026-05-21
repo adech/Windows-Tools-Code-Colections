@@ -1,0 +1,38 @@
+# Executar como Administrador
+Write-Host "🌐 Iniciando otimização de navegação..." -ForegroundColor Cyan
+
+# 1. Definir DNS para Cloudflare + Google
+Get-DnsClientServerAddress | ForEach-Object {
+    Set-DnsClientServerAddress -InterfaceIndex $_.InterfaceIndex -ServerAddresses ("1.1.1.1","8.8.8.8")
+}
+Write-Host ✔️ DNS configurado para Cloudflare (1.1.1.1) e Google (8.8.8.8)" -ForegroundColor Green
+
+# 2. Limpar cache DNS
+ipconfig /flushdns | Out-Null
+Write-Host "✔️ Cache de DNS limpo" -ForegroundColor Green
+
+# 3. Desativar IPv6 (se não estiver usando)
+Disable-NetAdapterBinding -Name "*" -ComponentID ms_tcpip6 -Confirm:$false -ErrorAction SilentlyContinue
+Write-Host "✔️ IPv6 desativado (opcional)" -ForegroundColor Green
+
+# 4. Ativar TCP Fast Open
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableTcpFastOpen" -PropertyType DWord -Value 1 -Force | Out-Null
+Write-Host "✔️ TCP Fast Open ativado" -ForegroundColor Green
+
+# 5. Ativar congestion control CTCP (melhor para conexões instáveis)
+netsh int tcp set global congestionprovider=ctcp | Out-Null
+Write-Host "✔️ Protocolo CTCP ativado (controle de congestionamento moderno)" -ForegroundColor Green
+
+# 6. Desativar Delivery Optimization (caso não queira que use banda)
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config"
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+New-ItemProperty -Path $regPath -Name "DODownloadMode" -Value 0 -PropertyType DWord -Force | Out-Null
+Write-Host "✔️ Delivery Optimization desativado" -ForegroundColor Green
+
+# 7. Desativar Telemetria (nível básico)
+New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -PropertyType DWord -Value 1 -Force | Out-Null
+Write-Host "✔️ Telemetria ajustada para o mínimo permitido" -ForegroundColor Green
+
+Write-Host "`n🚀 Otimização de rede concluída! Reinicie para aplicar todas as mudanças." -ForegroundColor Cyan

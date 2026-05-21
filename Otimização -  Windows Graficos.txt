@@ -1,0 +1,54 @@
+# Requer execução como ADMINISTRADOR
+Write-Host "🎮 Otimizando o Windows para jogos..." -ForegroundColor Cyan
+
+# 1. Ativar plano de alto desempenho
+$HighPerf = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+powercfg -duplicatescheme $HighPerf | Out-Null
+powercfg -setactive $HighPerf
+Write-Host "✔️ Modo de energia: Alto Desempenho" -ForegroundColor Green
+
+# 2. Desativar Game DVR e gravação em segundo plano
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR" -Name "AppCaptureEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+New-ItemProperty -Path "HKCU:\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
+Write-Host "✔️ Game DVR desativado" -ForegroundColor Green
+
+# 3. Ativar modo de jogo (Game Mode)
+New-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AutoGameModeEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+Write-Host "✔️ Game Mode ativado" -ForegroundColor Green
+
+# 4. Priorizar aplicativos em tempo real
+cmd.exe /c "wmic process where name='explorer.exe' CALL setpriority 128" | Out-Null
+Write-Host "✔️ Prioridade de processos ajustada" -ForegroundColor Green
+
+# 5. Desativar serviços que consomem recursos em segundo plano (não críticos)
+$servicesToDisable = @(
+    "DiagTrack",         # Telemetria
+    "SysMain",           # Superfetch
+    "WSearch"            # Windows Search
+)
+foreach ($service in $servicesToDisable) {
+    Stop-Service -Name $service -Force -ErrorAction SilentlyContinue
+    Set-Service -Name $service -StartupType Disabled
+}
+Write-Host "✔️ Serviços de segundo plano desativados" -ForegroundColor Green
+
+# 6. Desativar otimização de entrega (Delivery Optimization)
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config"
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+New-ItemProperty -Path $regPath -Name "DODownloadMode" -Value 0 -PropertyType DWord -Force | Out-Null
+Write-Host "✔️ Delivery Optimization desativado" -ForegroundColor Green
+
+
+# 7. Ativar modo de GPU de alto desempenho (GPU Scheduling) - Requer reinício
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value 2 -PropertyType DWord -Force | Out-Null
+Write-Host "✔️ Agendamento de GPU ativado (precisa reiniciar)" -ForegroundColor Green
+
+# 8. Limpar arquivos temporários do sistema
+Write-Host "🧹 Limpando arquivos temporários..."
+Remove-Item "$env:TEMP\*" -Force -Recurse -ErrorAction SilentlyContinue
+Remove-Item "$env:WINDIR\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
+Write-Host "✔️ Temporários limpos" -ForegroundColor Green
+
+Write-Host "`n🚀 Otimização concluída! Reinicie o computador para aplicar todas as mudanças." -ForegroundColor Cyan
