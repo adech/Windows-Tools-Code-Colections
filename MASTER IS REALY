@@ -1,0 +1,69 @@
+# ===============================
+# SCRIPT PÓS-FORMATAÇÃO COMPLETO
+# INSTALL INDIVIDUAIS winget install --id Microsoft.DirectX -e --silent --accept-package-agreements --accept-source-agreements
+# ===============================
+
+# Evita erros de execução
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+# Log
+$log = "$env:USERPROFILE\Desktop\instalacao_log.txt"
+Start-Transcript -Path $log -Append
+
+Write-Host "Iniciando configuração do sistema..." -ForegroundColor Green
+
+# ===============================
+# Atualizar Winget
+# ===============================
+winget upgrade --all --accept-package-agreements --accept-source-agreements
+
+# ===============================
+# Lista de programas
+# ===============================
+$apps = @(
+"Adobe.Acrobat.Reader.64-bit"
+"DelugeTeam.Deluge"
+"Discord.Discord"
+"GIMP.GIMP"
+"MiniTool.PartitionWizard.Free"
+"MSI.Afterburner"
+"RiotGames.RiotClient"
+"TeamViewer.TeamViewer"
+"RARLab.WinRAR"
+"Notepad++.Notepad++"
+"Microsoft.DirectX"
+)
+
+# ===============================
+# Instalar programas
+# ===============================
+foreach ($app in $apps) {
+    Write-Host "Instalando $app..." -ForegroundColor Cyan
+    winget install --id $app -e --accept-package-agreements --accept-source-agreements --silent
+}
+
+# ===============================
+# Instalar dependências importantes
+# ===============================
+Write-Host "Instalando dependências..." -ForegroundColor Yellow
+
+winget install --id Microsoft.VCRedist.2015+.x64 -e --silent
+winget install --id Microsoft.DotNet.Runtime.6 -e --silent
+winget install --id Microsoft.DirectX -e --silent
+
+# ===============================
+# Windows Update (forçar)
+# ===============================
+Write-Host "Atualizando Windows..." -ForegroundColor Magenta
+
+Install-Module PSWindowsUpdate -Force -Confirm:$false
+Import-Module PSWindowsUpdate
+Get-WindowsUpdate -Install -AcceptAll -IgnoreReboot
+
+# ===============================
+# Finalização
+# ===============================
+Write-Host "Finalizado!" -ForegroundColor Green
+Stop-Transcript
+
+Write-Host "Log salvo em: $log"
