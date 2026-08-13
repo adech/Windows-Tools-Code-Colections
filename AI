@@ -1,0 +1,1629 @@
+# =====================================================================
+# POWERSHELL MASTER
+# PÓS-FORMATAÇÃO COMPLETA
+#
+# INCLUI:
+#   - Winget
+#   - Programas principais
+#   - RetroArch
+#   - Dependências
+#   - Office LTSC Professional Plus 2024
+#   - Remoção automática de Office antigo
+#   - Microsoft 365 / Click-to-Run
+#   - Office MSI
+#   - Windows Update
+#   - Logs
+#   - Verificação real da instalação do Office
+#
+# IMPORTANTE:
+# Execute este arquivo como ADMINISTRADOR.
+# =====================================================================
+
+Set-StrictMode -Version 2.0
+$ErrorActionPreference = "Continue"
+
+# =====================================================================
+# CONFIGURAÇÕES
+# =====================================================================
+
+$OfficeProductID = "ProPlus2024Volume"
+$OfficeChannel   = "PerpetualVL2024"
+$OfficeLanguage  = "pt-BR"
+$OfficeArch      = "64"
+
+$MasterRoot = Join-Path $env:USERPROFILE "Desktop\PowerShell-Master-Logs"
+
+if (-not (Test-Path $MasterRoot)) {
+    New-Item `
+        -ItemType Directory `
+        -Path $MasterRoot `
+        -Force | Out-Null
+}
+
+$TimeStamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+
+$LogFile = Join-Path `
+    $MasterRoot `
+    "Master_$TimeStamp.txt"
+
+$OfficeLogFile = Join-Path `
+    $MasterRoot `
+    "Office_$TimeStamp.txt"
+
+$OfficeDir = Join-Path `
+    $env:TEMP `
+    "PowerShellMaster_OfficeLTSC2024"
+
+# =====================================================================
+# TRANSCRIPT
+# =====================================================================
+
+try {
+    Start-Transcript `
+        -Path $LogFile `
+        -Append | Out-Null
+}
+catch {
+    Write-Host "Não foi possível iniciar o Transcript." `
+        -ForegroundColor Yellow
+}
+
+# =====================================================================
+# FUNÇÃO DE STATUS
+# =====================================================================
+
+function Write-Status {
+
+    param(
+        [string]$Message,
+        [ConsoleColor]$Color = [ConsoleColor]::White
+    )
+
+    $Now = Get-Date -Format "HH:mm:ss"
+
+    Write-Host `
+        "[$Now] $Message" `
+        -ForegroundColor $Color
+}
+
+# =====================================================================
+# CABEÇALHO
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Status `
+    "           POWERSHELL MASTER" `
+    Green
+
+Write-Status `
+    "        PÓS-FORMATAÇÃO COMPLETA" `
+    Green
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Host ""
+
+Write-Status `
+    "Computador : $env:COMPUTERNAME"
+
+Write-Status `
+    "Usuário    : $env:USERNAME"
+
+Write-Status `
+    "Windows    : $([Environment]::OSVersion.Version)"
+
+Write-Status `
+    "Arquitetura: $env:PROCESSOR_ARCHITECTURE"
+
+Write-Status `
+    "Data       : $(Get-Date)"
+
+Write-Host ""
+
+Write-Status `
+    "Office alvo: LTSC Professional Plus 2024" `
+    Magenta
+
+Write-Status `
+    "Product ID: $OfficeProductID" `
+    Magenta
+
+Write-Status `
+    "Channel   : $OfficeChannel" `
+    Magenta
+
+Write-Status `
+    "Idioma    : $OfficeLanguage" `
+    Magenta
+
+Write-Status `
+    "Arquitetura: $OfficeArch-bit" `
+    Magenta
+
+Write-Host ""
+
+# =====================================================================
+# VERIFICAR ADMINISTRADOR
+# =====================================================================
+
+Write-Status `
+    "Verificando privilégios administrativos..." `
+    Yellow
+
+$CurrentIdentity = `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+
+$Principal = `
+    New-Object Security.Principal.WindowsPrincipal($CurrentIdentity)
+
+$IsAdmin = `
+    $Principal.IsInRole(
+        [Security.Principal.WindowsBuiltInRole]::Administrator
+    )
+
+if (-not $IsAdmin) {
+
+    Write-Status `
+        "ERRO: o PowerShell não está sendo executado como Administrador." `
+        Red
+
+    Write-Status `
+        "Clique com botão direito no PowerShell e escolha 'Executar como administrador'." `
+        Yellow
+
+    try {
+        Stop-Transcript | Out-Null
+    }
+    catch {}
+
+    exit 1
+}
+
+Write-Status `
+    "Privilégios administrativos OK." `
+    Green
+
+# =====================================================================
+# EXECUTION POLICY
+# =====================================================================
+
+Set-ExecutionPolicy `
+    Bypass `
+    -Scope Process `
+    -Force `
+    -ErrorAction SilentlyContinue
+
+# =====================================================================
+# VERIFICAR WINGET
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "Verificando Winget..." `
+    Yellow
+
+$WingetCommand = Get-Command `
+    winget.exe `
+    -ErrorAction SilentlyContinue
+
+if (-not $WingetCommand) {
+
+    Write-Status `
+        "ERRO: Winget não encontrado." `
+        Red
+
+    Write-Status `
+        "Instale/atualize o App Installer da Microsoft Store." `
+        Yellow
+
+    try {
+        Stop-Transcript | Out-Null
+    }
+    catch {}
+
+    exit 1
+}
+
+Write-Status `
+    "Winget encontrado." `
+    Green
+
+# =====================================================================
+# ATUALIZAR FONTES WINGET
+# =====================================================================
+
+Write-Status `
+    "Atualizando fontes do Winget..." `
+    Yellow
+
+winget source update
+
+Write-Host ""
+
+# =====================================================================
+# LISTA DE PROGRAMAS
+# =====================================================================
+
+$Apps = @(
+
+    # ================================================================
+    # UTILITÁRIOS
+    # ================================================================
+
+    "Adobe.Acrobat.Reader.64-bit"
+    "RARLab.WinRAR"
+    "Notepad++.Notepad++"
+
+    # ================================================================
+    # INTERNET / COMUNICAÇÃO
+    # ================================================================
+
+    "Discord.Discord"
+    "DelugeTeam.Deluge"
+    "TeamViewer.TeamViewer"
+
+    # ================================================================
+    # GRÁFICOS / HARDWARE
+    # ================================================================
+
+    "GIMP.GIMP"
+    "MiniTool.PartitionWizard.Free"
+    "MSI.Afterburner"
+
+    # ================================================================
+    # EMULAÇÃO / JOGOS
+    # ================================================================
+
+    "Libretro.RetroArch"
+
+    # ================================================================
+    # DEPENDÊNCIAS
+    # ================================================================
+
+    "Microsoft.VCRedist.2015+.x64"
+    "Microsoft.DotNet.Runtime.6"
+    "Microsoft.DirectX"
+)
+
+# =====================================================================
+# RESULTADOS
+# =====================================================================
+
+$Success = [System.Collections.Generic.List[string]]::new()
+
+$Failed = [System.Collections.Generic.List[string]]::new()
+
+# =====================================================================
+# FUNÇÃO PARA INSTALAR WINGET
+# =====================================================================
+
+function Install-WingetApp {
+
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Id
+    )
+
+    Write-Status `
+        "Instalando: $Id" `
+        Cyan
+
+    try {
+
+        & winget install `
+            --id $Id `
+            -e `
+            --silent `
+            --accept-package-agreements `
+            --accept-source-agreements `
+            --disable-interactivity
+
+        $ExitCode = $LASTEXITCODE
+
+        if ($ExitCode -eq 0) {
+
+            Write-Status `
+                "OK: $Id" `
+                Green
+
+            return $true
+        }
+
+        Write-Status `
+            "FALHA: $Id | Código: $ExitCode" `
+            Red
+
+        return $false
+    }
+    catch {
+
+        Write-Status `
+            "ERRO: $Id" `
+            Red
+
+        Write-Host `
+            $_.Exception.Message `
+            -ForegroundColor Red
+
+        return $false
+    }
+}
+
+# =====================================================================
+# INSTALAÇÃO DOS PROGRAMAS
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Status `
+    "       INSTALAÇÃO DOS PROGRAMAS" `
+    Magenta
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Host ""
+
+foreach ($App in $Apps) {
+
+    $Result = Install-WingetApp `
+        -Id $App
+
+    if ($Result) {
+
+        $Success.Add($App)
+    }
+    else {
+
+        $Failed.Add($App)
+    }
+
+    Start-Sleep `
+        -Seconds 1
+}
+
+# =====================================================================
+# ATUALIZAR PROGRAMAS VIA WINGET
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Yellow
+
+Write-Status `
+    "          ATUALIZAÇÃO DOS PROGRAMAS" `
+    Yellow
+
+Write-Status `
+    "============================================" `
+    Yellow
+
+Write-Host ""
+
+Write-Status `
+    "Verificando atualizações..." `
+    Yellow
+
+try {
+
+    winget upgrade `
+        --all `
+        --silent `
+        --accept-package-agreements `
+        --accept-source-agreements `
+        --disable-interactivity
+
+    Write-Status `
+        "Atualização dos programas concluída." `
+        Green
+}
+catch {
+
+    Write-Status `
+        "Não foi possível concluir todas as atualizações." `
+        Yellow
+}
+
+# =====================================================================
+# OFFICE
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Status `
+    "     OFFICE LTSC PROFESSIONAL PLUS 2024" `
+    Magenta
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Host ""
+
+# =====================================================================
+# LIMPAR DIRETÓRIO ANTERIOR
+# =====================================================================
+
+if (Test-Path $OfficeDir) {
+
+    Write-Status `
+        "Limpando instalação temporária anterior..." `
+        Yellow
+
+    Remove-Item `
+        $OfficeDir `
+        -Recurse `
+        -Force `
+        -ErrorAction SilentlyContinue
+}
+
+New-Item `
+    -ItemType Directory `
+    -Path $OfficeDir `
+    -Force | Out-Null
+
+# =====================================================================
+# DOWNLOAD DO OFFICE DEPLOYMENT TOOL
+# =====================================================================
+
+Write-Status `
+    "Obtendo Office Deployment Tool oficial..." `
+    Yellow
+
+$ODTPage = `
+    "https://www.microsoft.com/en-us/download/details.aspx?id=49117"
+
+$ODTInstaller = Join-Path `
+    $OfficeDir `
+    "officedeploymenttool.exe"
+
+$ODTDownloadLink = $null
+
+try {
+
+    $WebResponse = Invoke-WebRequest `
+        -Uri $ODTPage `
+        -UseBasicParsing `
+        -ErrorAction Stop
+
+    $PageContent = $WebResponse.Content
+
+    $Regex = `
+        'https://download\.microsoft\.com/download/[A-Za-z0-9\-\/]+/officedeploymenttool_[0-9\-\.]+\.exe'
+
+    $Match = `
+        [regex]::Match(
+            $PageContent,
+            $Regex,
+            [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+        )
+
+    if ($Match.Success) {
+
+        $ODTDownloadLink = $Match.Value
+    }
+}
+
+catch {
+
+    Write-Status `
+        "Não foi possível localizar o link automaticamente." `
+        Yellow
+}
+
+# =====================================================================
+# FALLBACK
+# =====================================================================
+
+if (-not $ODTDownloadLink) {
+
+    Write-Status `
+        "Tentando endereço alternativo do ODT..." `
+        Yellow
+
+    $ODTDownloadLink = `
+        "https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_19029-20278.exe"
+}
+
+Write-Status `
+    "Baixando Office Deployment Tool..." `
+    Yellow
+
+try {
+
+    Invoke-WebRequest `
+        -Uri $ODTDownloadLink `
+        -OutFile $ODTInstaller `
+        -UseBasicParsing `
+        -ErrorAction Stop
+
+    if (-not (Test-Path $ODTInstaller)) {
+
+        throw `
+            "O arquivo do Office Deployment Tool não foi encontrado após o download."
+    }
+
+    Write-Status `
+        "Office Deployment Tool baixado." `
+        Green
+}
+catch {
+
+    Write-Status `
+        "ERRO AO BAIXAR OFFICE DEPLOYMENT TOOL." `
+        Red
+
+    Write-Host `
+        $_.Exception.Message `
+        -ForegroundColor Red
+
+    $OfficeFailed = $true
+}
+
+# =====================================================================
+# EXTRAIR ODT
+# =====================================================================
+
+$OfficeSetup = Join-Path `
+    $OfficeDir `
+    "setup.exe"
+
+if (Test-Path $ODTInstaller) {
+
+    Write-Status `
+        "Extraindo Office Deployment Tool..." `
+        Yellow
+
+    try {
+
+        $ExtractProcess = Start-Process `
+            -FilePath $ODTInstaller `
+            -ArgumentList "/quiet /extract:`"$OfficeDir`"" `
+            -Wait `
+            -PassThru `
+            -ErrorAction Stop
+
+        Start-Sleep `
+            -Seconds 3
+
+        if (-not (Test-Path $OfficeSetup)) {
+
+            throw `
+                "setup.exe não foi encontrado após a extração."
+        }
+
+        Write-Status `
+            "ODT extraído com sucesso." `
+            Green
+    }
+    catch {
+
+        Write-Status `
+            "ERRO AO EXTRAIR ODT." `
+            Red
+
+        Write-Host `
+            $_.Exception.Message `
+            -ForegroundColor Red
+    }
+}
+
+# =====================================================================
+# DETECTAR OFFICE EXISTENTE
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Yellow
+
+Write-Status `
+    "      DETECÇÃO DO OFFICE EXISTENTE" `
+    Yellow
+
+Write-Status `
+    "============================================" `
+    Yellow
+
+Write-Host ""
+
+$OfficeDetected = $false
+
+# =====================================================================
+# CLICK-TO-RUN
+# =====================================================================
+
+$C2RPaths = @(
+
+    "$env:ProgramFiles\Common Files\Microsoft Shared\ClickToRun",
+
+    "${env:ProgramFiles(x86)}\Common Files\Microsoft Shared\ClickToRun",
+
+    "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun",
+
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Office\ClickToRun"
+)
+
+foreach ($PathItem in $C2RPaths) {
+
+    try {
+
+        if (Test-Path $PathItem) {
+
+            $OfficeDetected = $true
+
+            Write-Status `
+                "Office Click-to-Run detectado." `
+                Yellow
+
+            break
+        }
+    }
+    catch {}
+}
+
+# =====================================================================
+# REGISTRO OFFICE 16.0
+# =====================================================================
+
+$OfficeRegistryPaths = @(
+
+    "HKLM:\SOFTWARE\Microsoft\Office\16.0",
+
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Office\16.0"
+)
+
+foreach ($RegPath in $OfficeRegistryPaths) {
+
+    try {
+
+        if (Test-Path $RegPath) {
+
+            $OfficeDetected = $true
+
+            Write-Status `
+                "Registro de Office 16.0 detectado." `
+                Yellow
+
+            break
+        }
+    }
+    catch {}
+}
+
+# =====================================================================
+# PROGRAMAS INSTALADOS
+# =====================================================================
+
+$UninstallPaths = @(
+
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
+
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+)
+
+foreach ($UninstallPath in $UninstallPaths) {
+
+    try {
+
+        $InstalledPrograms = `
+            Get-ItemProperty `
+                $UninstallPath `
+                -ErrorAction SilentlyContinue
+
+        foreach ($Program in $InstalledPrograms) {
+
+            if (
+                $Program.DisplayName -and
+                (
+                    $Program.DisplayName -match "Microsoft 365" -or
+                    $Program.DisplayName -match "Microsoft Office" -or
+                    $Program.DisplayName -match "Office Professional" -or
+                    $Program.DisplayName -match "Office Home" -or
+                    $Program.DisplayName -match "Office Standard" -or
+                    $Program.DisplayName -match "Office LTSC"
+                )
+            ) {
+
+                $OfficeDetected = $true
+
+                Write-Status `
+                    "Office instalado encontrado: $($Program.DisplayName)" `
+                    Yellow
+            }
+        }
+    }
+    catch {}
+}
+
+if (-not $OfficeDetected) {
+
+    Write-Status `
+        "Nenhuma instalação anterior do Office foi detectada." `
+        Green
+}
+else {
+
+    Write-Status `
+        "Existe uma instalação anterior do Office." `
+        Yellow
+}
+
+# =====================================================================
+# REMOVER OFFICE ANTIGO
+# =====================================================================
+
+if ($OfficeDetected -and (Test-Path $OfficeSetup)) {
+
+    Write-Host ""
+
+    Write-Status `
+        "============================================" `
+        Red
+
+    Write-Status `
+        "       REMOVENDO OFFICE ANTIGO" `
+        Red
+
+    Write-Status `
+        "============================================" `
+        Red
+
+    Write-Host ""
+
+    $RemoveConfig = Join-Path `
+        $OfficeDir `
+        "remove-office.xml"
+
+    $RemoveXML = @"
+<Configuration>
+
+    <Remove All="TRUE"/>
+
+    <RemoveMSI/>
+
+    <Display
+        Level="None"
+        AcceptEULA="TRUE"/>
+
+</Configuration>
+"@
+
+    try {
+
+        $RemoveXML |
+            Set-Content `
+                -Path $RemoveConfig `
+                -Encoding UTF8
+
+        Write-Status `
+            "Configuração de remoção criada." `
+            Green
+
+        Write-Status `
+            "Encerrando aplicativos Office..." `
+            Yellow
+
+        $OfficeProcesses = @(
+
+            "WINWORD",
+            "EXCEL",
+            "POWERPNT",
+            "OUTLOOK",
+            "ONENOTE",
+            "MSACCESS",
+            "MSPUB",
+            "VISIO",
+            "WINPROJ",
+            "OfficeClickToRun",
+            "OfficeC2RClient"
+        )
+
+        foreach ($ProcessName in $OfficeProcesses) {
+
+            Get-Process `
+                -Name $ProcessName `
+                -ErrorAction SilentlyContinue |
+                Stop-Process `
+                    -Force `
+                    -ErrorAction SilentlyContinue
+        }
+
+        Start-Sleep `
+            -Seconds 3
+
+        Write-Status `
+            "Executando remoção do Office..." `
+            Yellow
+
+        $RemoveProcess = Start-Process `
+            -FilePath $OfficeSetup `
+            -ArgumentList "/configure `"$RemoveConfig`"" `
+            -Wait `
+            -PassThru `
+            -ErrorAction Stop
+
+        $RemoveExitCode = $RemoveProcess.ExitCode
+
+        if ($RemoveExitCode -eq 0) {
+
+            Write-Status `
+                "Office antigo removido com sucesso." `
+                Green
+        }
+        else {
+
+            Write-Status `
+                "ATENÇÃO: remoção retornou código $RemoveExitCode" `
+                Red
+        }
+
+        Start-Sleep `
+            -Seconds 5
+    }
+    catch {
+
+        Write-Status `
+            "ERRO AO REMOVER OFFICE ANTIGO." `
+            Red
+
+        Write-Host `
+            $_.Exception.Message `
+            -ForegroundColor Red
+    }
+}
+
+# =====================================================================
+# CONFIGURATION.XML OFFICE 2024
+# =====================================================================
+
+if (Test-Path $OfficeSetup) {
+
+    Write-Host ""
+
+    Write-Status `
+        "============================================" `
+        Cyan
+
+    Write-Status `
+        "       CONFIGURANDO OFFICE LTSC 2024" `
+        Cyan
+
+    Write-Status `
+        "============================================" `
+        Cyan
+
+    Write-Host ""
+
+    $ConfigurationFile = Join-Path `
+        $OfficeDir `
+        "configuration.xml"
+
+    $OfficeXML = @"
+<Configuration>
+
+    <Add
+        OfficeClientEdition="64"
+        Channel="PerpetualVL2024">
+
+        <Product
+            ID="ProPlus2024Volume">
+
+            <Language
+                ID="pt-BR"/>
+
+        </Product>
+
+    </Add>
+
+    <RemoveMSI/>
+
+    <Property
+        Name="AUTOACTIVATE"
+        Value="0"/>
+
+    <Property
+        Name="FORCEAPPSHUTDOWN"
+        Value="TRUE"/>
+
+    <Display
+        Level="None"
+        AcceptEULA="TRUE"/>
+
+</Configuration>
+"@
+
+    try {
+
+        $OfficeXML |
+            Set-Content `
+                -Path $ConfigurationFile `
+                -Encoding UTF8
+
+        Write-Status `
+            "Configuration.xml criado." `
+            Green
+    }
+    catch {
+
+        Write-Status `
+            "ERRO ao criar Configuration.xml." `
+            Red
+    }
+
+    # =================================================================
+    # DOWNLOAD DOS ARQUIVOS DO OFFICE
+    # =================================================================
+
+    Write-Host ""
+
+    Write-Status `
+        "Baixando arquivos do Office LTSC 2024..." `
+        Yellow
+
+    Write-Status `
+        "Isso pode demorar alguns minutos." `
+        Yellow
+
+    Write-Status `
+        "Destino: $OfficeDir" `
+        DarkGray
+
+    try {
+
+        Push-Location `
+            $OfficeDir
+
+        & $OfficeSetup `
+            /download `
+            $ConfigurationFile `
+            2>&1 |
+            Tee-Object `
+                -FilePath $OfficeLogFile `
+                -Append
+
+        $DownloadExitCode = $LASTEXITCODE
+
+        Pop-Location
+
+        if ($DownloadExitCode -eq 0) {
+
+            Write-Status `
+                "Download do Office concluído." `
+                Green
+        }
+        else {
+
+            Write-Status `
+                "ERRO NO DOWNLOAD DO OFFICE." `
+                Red
+
+            Write-Status `
+                "Código real: $DownloadExitCode" `
+                Red
+        }
+    }
+    catch {
+
+        try {
+            Pop-Location
+        }
+        catch {}
+
+        Write-Status `
+            "EXCEÇÃO DURANTE DOWNLOAD DO OFFICE." `
+            Red
+
+        Write-Host `
+            $_.Exception.Message `
+            -ForegroundColor Red
+    }
+
+    # =================================================================
+    # INSTALAÇÃO OFFICE
+    # =================================================================
+
+    Write-Host ""
+
+    Write-Status `
+        "============================================" `
+        Cyan
+
+    Write-Status `
+        "       INSTALANDO OFFICE LTSC 2024" `
+        Cyan
+
+    Write-Status `
+        "============================================" `
+        Cyan
+
+    Write-Host ""
+
+    Write-Status `
+        "Office LTSC Professional Plus 2024" `
+        Yellow
+
+    Write-Status `
+        "64-bit / pt-BR / PerpetualVL2024" `
+        Yellow
+
+    Write-Status `
+        "Aguarde até o processo terminar..." `
+        Yellow
+
+    try {
+
+        Push-Location `
+            $OfficeDir
+
+        & $OfficeSetup `
+            /configure `
+            $ConfigurationFile `
+            2>&1 |
+            Tee-Object `
+                -FilePath $OfficeLogFile `
+                -Append
+
+        $OfficeInstallExitCode = $LASTEXITCODE
+
+        Pop-Location
+
+        Write-Host ""
+
+        if ($OfficeInstallExitCode -eq 0) {
+
+            Write-Status `
+                "Comando de instalação concluído." `
+                Green
+        }
+        else {
+
+            Write-Status `
+                "============================================" `
+                Red
+
+            Write-Status `
+                "ERRO NA INSTALAÇÃO DO OFFICE" `
+                Red
+
+            Write-Status `
+                "Código real: $OfficeInstallExitCode" `
+                Red
+
+            Write-Status `
+                "Log: $OfficeLogFile" `
+                Red
+
+            Write-Status `
+                "============================================" `
+                Red
+        }
+    }
+    catch {
+
+        try {
+            Pop-Location
+        }
+        catch {}
+
+        Write-Status `
+            "EXCEÇÃO DURANTE A INSTALAÇÃO DO OFFICE." `
+            Red
+
+        Write-Host `
+            $_.Exception.Message `
+            -ForegroundColor Red
+    }
+}
+else {
+
+    Write-Status `
+        "ERRO: setup.exe do Office não está disponível." `
+        Red
+
+    Write-Status `
+        "A instalação do Office foi interrompida." `
+        Red
+}
+
+# =====================================================================
+# VERIFICAÇÃO REAL DO OFFICE
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Cyan
+
+Write-Status `
+    "       VERIFICAÇÃO DO OFFICE" `
+    Cyan
+
+Write-Status `
+    "============================================" `
+    Cyan
+
+Write-Host ""
+
+Start-Sleep `
+    -Seconds 5
+
+$OfficeInstalled = $false
+
+# =====================================================================
+# VERIFICAR CLICK-TO-RUN
+# =====================================================================
+
+$C2RRegistry = @(
+    "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration",
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Office\ClickToRun\Configuration"
+)
+
+foreach ($C2RReg in $C2RRegistry) {
+
+    try {
+
+        if (Test-Path $C2RReg) {
+
+            $C2RData = `
+                Get-ItemProperty `
+                    -Path $C2RReg `
+                    -ErrorAction SilentlyContinue
+
+            if ($C2RData.ProductReleaseIds) {
+
+                Write-Status `
+                    "ProductReleaseIds: $($C2RData.ProductReleaseIds)" `
+                    Cyan
+
+                if (
+                    $C2RData.ProductReleaseIds `
+                    -match "ProPlus2024Volume"
+                ) {
+
+                    $OfficeInstalled = $true
+
+                    if ($C2RData.ClientVersionToReport) {
+
+                        Write-Status `
+                            "Versão instalada: $($C2RData.ClientVersionToReport)" `
+                            Cyan
+                    }
+                }
+            }
+        }
+    }
+    catch {}
+}
+
+# =====================================================================
+# VERIFICAR EXECUTÁVEL WINWORD
+# =====================================================================
+
+$WordPaths = @(
+
+    "$env:ProgramFiles\Microsoft Office\root\Office16\WINWORD.EXE",
+
+    "${env:ProgramFiles(x86)}\Microsoft Office\root\Office16\WINWORD.EXE"
+)
+
+foreach ($WordPath in $WordPaths) {
+
+    if (Test-Path $WordPath) {
+
+        $OfficeInstalled = $true
+
+        Write-Status `
+            "WINWORD.EXE encontrado:" `
+            Green
+
+        Write-Status `
+            "$WordPath" `
+            DarkGray
+
+        try {
+
+            $FileVersion = `
+                (Get-Item $WordPath).VersionInfo.FileVersion
+
+            Write-Status `
+                "Versão do WINWORD: $FileVersion" `
+                Cyan
+        }
+        catch {}
+    }
+}
+
+# =====================================================================
+# RESULTADO OFFICE
+# =====================================================================
+
+Write-Host ""
+
+if ($OfficeInstalled) {
+
+    Write-Status `
+        "============================================" `
+        Green
+
+    Write-Status `
+        "        OFFICE: INSTALADO" `
+        Green
+
+    Write-Status `
+        "Office LTSC Professional Plus 2024" `
+        Green
+
+    Write-Status `
+        "Product ID: ProPlus2024Volume" `
+        Green
+
+    Write-Status `
+        "Channel: PerpetualVL2024" `
+        Green
+
+    Write-Status `
+        "Idioma: pt-BR" `
+        Green
+
+    Write-Status `
+        "Arquitetura: 64-bit" `
+        Green
+
+    Write-Status `
+        "============================================" `
+        Green
+}
+else {
+
+    Write-Status `
+        "============================================" `
+        Red
+
+    Write-Status `
+        "        OFFICE: NÃO INSTALADO" `
+        Red
+
+    Write-Status `
+        "A instalação não foi confirmada." `
+        Red
+
+    Write-Status `
+        "Verifique o log:" `
+        Yellow
+
+    Write-Status `
+        "$OfficeLogFile" `
+        Yellow
+
+    Write-Status `
+        "============================================" `
+        Red
+}
+
+# =====================================================================
+# WINDOWS UPDATE
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Status `
+    "             WINDOWS UPDATE" `
+    Magenta
+
+Write-Status `
+    "============================================" `
+    Magenta
+
+Write-Host ""
+
+try {
+
+    if (-not (
+        Get-Module `
+            -ListAvailable `
+            -Name PSWindowsUpdate
+    )) {
+
+        Write-Status `
+            "Instalando PSWindowsUpdate..." `
+            Yellow
+
+        Install-Module `
+            -Name PSWindowsUpdate `
+            -Force `
+            -Confirm:$false `
+            -AllowClobber `
+            -ErrorAction Stop
+    }
+
+    Import-Module `
+        PSWindowsUpdate `
+        -Force
+
+    Write-Status `
+        "Procurando atualizações do Windows..." `
+        Yellow
+
+    Get-WindowsUpdate
+
+    Write-Host ""
+
+    Write-Status `
+        "Instalando atualizações..." `
+        Yellow
+
+    Get-WindowsUpdate `
+        -Install `
+        -AcceptAll `
+        -IgnoreReboot `
+        -Confirm:$false
+
+    Write-Status `
+        "Windows Update concluído." `
+        Green
+}
+catch {
+
+    Write-Status `
+        "Windows Update encontrou um problema." `
+        Yellow
+
+    Write-Host `
+        $_.Exception.Message `
+        -ForegroundColor Yellow
+}
+
+# =====================================================================
+# LIMPEZA
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "Limpando arquivos temporários do processo..." `
+    Yellow
+
+try {
+
+    if (Test-Path $OfficeDir) {
+
+        Remove-Item `
+            $OfficeDir `
+            -Recurse `
+            -Force `
+            -ErrorAction SilentlyContinue
+    }
+
+    Write-Status `
+        "Limpeza concluída." `
+        Green
+}
+catch {
+
+    Write-Status `
+        "Alguns arquivos temporários permaneceram." `
+        Yellow
+}
+
+# =====================================================================
+# RESUMO FINAL
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Status `
+    "             RESUMO FINAL" `
+    Green
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Host ""
+
+# =====================================================================
+# PROGRAMAS OK
+# =====================================================================
+
+Write-Status `
+    "PROGRAMAS INSTALADOS COM SUCESSO:" `
+    Green
+
+foreach ($Item in $Success) {
+
+    Write-Host `
+        "  [OK] $Item" `
+        -ForegroundColor Green
+}
+
+# =====================================================================
+# PROGRAMAS COM FALHA
+# =====================================================================
+
+Write-Host ""
+
+if ($Failed.Count -gt 0) {
+
+    Write-Status `
+        "PROGRAMAS COM FALHA:" `
+        Red
+
+    foreach ($Item in $Failed) {
+
+        Write-Host `
+            "  [ERRO] $Item" `
+            -ForegroundColor Red
+    }
+}
+else {
+
+    Write-Status `
+        "Nenhum programa apresentou falha." `
+        Green
+}
+
+# =====================================================================
+# TOTAIS
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "Total OK    : $($Success.Count)" `
+    Green
+
+Write-Status `
+    "Total Falha : $($Failed.Count)" `
+    Red
+
+Write-Host ""
+
+# =====================================================================
+# OFFICE
+# =====================================================================
+
+if ($OfficeInstalled) {
+
+    Write-Status `
+        "Office instalado: SIM" `
+        Green
+
+    Write-Status `
+        "Office LTSC Professional Plus 2024" `
+        Green
+}
+else {
+
+    Write-Status `
+        "Office instalado: NÃO CONFIRMADO" `
+        Red
+}
+
+# =====================================================================
+# RETROARCH
+# =====================================================================
+
+Write-Host ""
+
+$RetroArchInstalled = $false
+
+$RetroArchPaths = @(
+
+    "$env:LOCALAPPDATA\Programs\RetroArch\retroarch.exe",
+
+    "$env:ProgramFiles\RetroArch\retroarch.exe",
+
+    "${env:ProgramFiles(x86)}\RetroArch\retroarch.exe"
+)
+
+foreach ($RetroPath in $RetroArchPaths) {
+
+    if (Test-Path $RetroPath) {
+
+        $RetroArchInstalled = $true
+
+        Write-Status `
+            "RetroArch: INSTALADO" `
+            Green
+
+        break
+    }
+}
+
+if (-not $RetroArchInstalled) {
+
+    Write-Status `
+        "RetroArch: verificar pelo Winget/Aplicativos instalados." `
+        Yellow
+}
+
+# =====================================================================
+# LOGS
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "Log principal:" `
+    Cyan
+
+Write-Host `
+    $LogFile `
+    -ForegroundColor White
+
+Write-Status `
+    "Log específico do Office:" `
+    Cyan
+
+Write-Host `
+    $OfficeLogFile `
+    -ForegroundColor White
+
+# =====================================================================
+# FINAL
+# =====================================================================
+
+Write-Host ""
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Status `
+    "      POWERSHELL MASTER FINALIZADO" `
+    Green
+
+Write-Status `
+    "============================================" `
+    Green
+
+Write-Host ""
+
+Write-Status `
+    "Recomenda-se reiniciar o computador." `
+    Yellow
+
+Write-Host ""
+
+try {
+    Stop-Transcript | Out-Null
+}
+catch {}
+
+Write-Host ""
+
+Write-Host `
+    "Pressione ENTER para fechar..." `
+    -ForegroundColor Yellow
+
+Read-Host
