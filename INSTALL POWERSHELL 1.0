@@ -1,0 +1,23 @@
+$apps = @(
+    @{ Name = "HandBrake";       Id = "HandBrake.HandBrake" },
+    @{ Name = "Shutter Encoder"; Id = "PaulPacifico.ShutterEncoder" },
+    @{ Name = "FFmpeg";          Id = "Gyan.FFmpeg" }
+)
+
+$total = $apps.Count
+$index = 0
+
+foreach ($app in $apps) {
+    $percent = [math]::Round(($index / $total) * 100)
+    
+    Write-Progress -Activity "Instalando Conversores" -Status "$($app.Name) ($($index + 1) de $total)" -PercentComplete $percent
+    Write-Host "`n>>> Iniciando instalação: $($app.Name)..." -ForegroundColor Cyan
+
+    winget install --id $app.Id --exact --accept-package-agreements --accept-source-agreements
+
+    $index++
+    Start-Sleep -Seconds 1
+}
+
+Write-Progress -Activity "Instalando Conversores" -Completed
+Write-Host "`nInstalações concluídas com sucesso!" -ForegroundColor Green
