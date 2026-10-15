@@ -1,12 +1,15 @@
 $apps = @(
-    @{ Name = "HandBrake";       Id = "HandBrake.HandBrake" },
-    @{ Name = "Shutter Encoder"; Id = "PaulPacifico.ShutterEncoder" },
-    @{ Name = "FFmpeg";          Id = "Gyan.FFmpeg" },
-    @{ Name = "Parabolic";       Id = "Nickvision.Parabolic" },
-    @{ Name = "yt-dlp";          Id = "yt-dlp.yt-dlp" },
-    @{ Name = "yt-dlg";          Id = "yt-dlg.yt-dlg" },
-    @{ Name = "Stremio";         Id = "Stremio.Stremio" },
-    @{ Name = "Kodi";            Id = "XBMCFoundation.Kodi" }
+    @{ Name = "HandBrake";        Id = "HandBrake.HandBrake" },
+    @{ Name = "Shutter Encoder";  Id = "PaulPacifico.ShutterEncoder" },
+    @{ Name = "FFmpeg";           Id = "Gyan.FFmpeg" },
+    @{ Name = "Parabolic";        Id = "Nickvision.Parabolic" },
+    @{ Name = "yt-dlp";           Id = "yt-dlp.yt-dlp" },
+    @{ Name = "yt-dlg";           Id = "yt-dlg.yt-dlg" },
+    @{ Name = "Stremio";          Id = "Stremio.Stremio" },
+    @{ Name = "Kodi";             Id = "XBMCFoundation.Kodi" },
+    @{ Name = "Shotcut";          Id = "Meltytech.Shotcut" },
+    @{ Name = "Kdenlive";         Id = "KDE.Kdenlive" },
+    @{ Name = "DaVinci Resolve";  Id = "BlackmagicDesign.DaVinciResolve" }
 )
 
 $total =$apps.Count
