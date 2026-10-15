@@ -1,0 +1,38 @@
+# 1. Desativa descoberta e recepção Miracast
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PlayTo" -Name "ShowAutoConnect" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+
+# 2. Desativa projeção de tela via Política de Grupo
+$policyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect"
+if (-not (Test-Path $policyPath)) { New-Item -Path $policyPath -Force | Out-Null }
+Set-ItemProperty -Path $policyPath -Name "AllowProjectionToPC" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $policyPath -Name "AllowProjectionFromPC" -Value 0 -Type DWord -Force
+
+# 3. Desativa serviços de rede UPnP e DLNA
+"WMPNetworkSvc", "upnphost", "SSDPSRV" | ForEach-Object {
+    if (Get-Service -Name $_ -ErrorAction SilentlyContinue) {
+        Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
+        Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue
+    }
+}
+
+# 4. Desativa adaptadores virtuais de vídeo/espelhamento
+Get-PnpDevice -Class "Display" | Where-Object { $_.FriendlyName -match "Virtual|Mirror|IddSampleDriver|Indirect|USB Display" } | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue
+
+# 5. Bloqueia porta Miracast no Firewall
+New-NetFirewallRule -DisplayName "Bloquear Projecao Sem Fio (Miracast)" -Direction Outbound -Action Block -Protocol TCP -RemotePort 7236 -ErrorAction SilentlyContinue | Out-Null
+
+Write-Host "`nTudo configurado com sucesso!" -ForegroundColor Green
+
+--
+
+Para conferir se resta apenas a sua placa de vídeo física ativa, rode:
+
+PowerShell
+Get-PnpDevice -Class "Display" | Select-Object FriendlyName, Status
+
+Como reverter (caso precise voltar ao padrão)
+
+Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "AllowProjectionToPC" -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "AllowProjectionFromPC" -ErrorAction SilentlyContinue
+Remove-NetFirewallRule -DisplayName "Bloquear Projecao Sem Fio (Miracast)" -ErrorAction SilentlyContinue
+Set-Service -Name "SSDPSRV" -StartupType Manual -ErrorAction SilentlyContinue
