@@ -1,0 +1,101 @@
+$apps = @(
+    # Monitoramento e Diagnóstico
+    @{ Name = "CPUID HWMonitor";                    Id = "CPUID.HWMonitor" },
+    @{ Name = "CrystalDiskInfo";                    Id = "CrystalDewWorld.CrystalDiskInfo" },
+    @{ Name = "MSI Afterburner";                    Id = "Guru3D.Afterburner" },
+    @{ Name = "NetLimiter";                         Id = "Locktime.NetLimiter" },
+
+    # Utilitários e Manutenção
+    @{ Name = "CCleaner Defraggler";                Id = "Piriform.Defraggler" },
+    @{ Name = "Piriform Recuva";                    Id = "Piriform.Recuva" },
+    @{ Name = "Revo Uninstaller";                   Id = "RevoUninstaller.RevoUninstaller" },
+    @{ Name = "WinRAR";                             Id = "RARLab.WinRAR" },
+    @{ Name = "Macrium Reflect Free Edition";       Id = "ParamountSoftware.MacriumReflect.Free" },
+    @{ Name = "MiniTool Partition Wizard";          Id = "MiniTool.PartitionWizard" },
+    @{ Name = "Microsoft PowerToys";                Id = "Microsoft.PowerToys" },
+    @{ Name = "Lightshot";                          Id = "Skillbrains.Lightshot" },
+    @{ Name = "Malwarebytes";                       Id = "Malwarebytes.Malwarebytes" },
+
+    # Comunicação e Produtividade
+    @{ Name = "Discord";                            Id = "Discord.Discord" },
+    @{ Name = "Notion";                             Id = "Notion.Notion" },
+    @{ Name = "TeamViewer";                         Id = "TeamViewer.TeamViewer" },
+    @{ Name = "LibreOffice";                        Id = "TheDocumentFoundation.LibreOffice" },
+
+    # Desenvolvimento e Terminal
+    @{ Name = "Git";                                Id = "Git.Git" },
+    @{ Name = "GitHub CLI";                         Id = "GitHub.cli" },
+    @{ Name = "GitHub Copilot CLI";                 Id = "GitHub.copilot" },
+    @{ Name = "Node.js (LTS)";                      Id = "OpenJS.NodeJS.LTS" },
+    @{ Name = "Python 3.12";                        Id = "Python.Python.3.12" },
+    @{ Name = "Microsoft Visual Studio Code";       Id = "Microsoft.VisualStudioCode" },
+    @{ Name = "Notepad++";                          Id = "Notepad++.Notepad++" },
+    @{ Name = "Sublime Text 4";                     Id = "SublimeHQ.SublimeText.4" },
+
+    # Mídia, Áudio e Vídeo
+    @{ Name = "VLC Media Player";                   Id = "VideoLAN.VLC" },
+    @{ Name = "Kdenlive";                           Id = "KDE.Kdenlive" },
+    @{ Name = "OBS Studio";                         Id = "OBSProject.OBSStudio" },
+    @{ Name = "Shotcut";                            Id = "Meltytech.Shotcut" },
+    @{ Name = "HandBrake";                          Id = "HandBrake.HandBrake" },
+    @{ Name = "GIMP";                               Id = "GIMP.GIMP" },
+    @{ Name = "Kodi";                               Id = "XBMCFoundation.Kodi" },
+    @{ Name = "Stremio";                            Id = "SmartCode.Stremio" },
+    @{ Name = "Shutter Encoder";                    Id = "PaulPacifico.ShutterEncoder" },
+    @{ Name = "Parabolic (Nickvision)";             Id = "Nickvision.Parabolic" },
+    @{ Name = "yt-dlp";                             Id = "yt-dlp.yt-dlp" },
+    @{ Name = "LAV Filters";                        Id = "HendrikLeppkes.LAVFilters" },
+
+    # Downloads e Torrents
+    @{ Name = "Deluge";                             Id = "DelugeTeam.Deluge" },
+    @{ Name = "Transmission";                       Id = "Transmission.Transmission" },
+    @{ Name = "JDownloader 2";                      Id = "AppWork.JDownloader" },
+
+    # Emuladores e Jogos
+    @{ Name = "RetroArch";                          Id = "Libretro.RetroArch" },
+    @{ Name = "DuckStation";                        Id = "Stenzek.DuckStation" },
+    @{ Name = "mGBA";                               Id = "mgba-emu.mgba" },
+    @{ Name = "Epic Games Launcher";                Id = "EpicGames.EpicGamesLauncher" },
+    @{ Name = "Ubisoft Connect";                    Id = "Ubisoft.Connect" },
+
+    # Rede e VPN
+    @{ Name = "Proton VPN";                         Id = "Proton.ProtonVPN" },
+    @{ Name = "hide.me VPN";                        Id = "eVenture.hidemeVPN" },
+
+    # Backup & Infraestrutura
+    @{ Name = "Veeam Agent for Windows";            Id = "Veeam.Agent" },
+
+    # Runtimes Microsoft Visual C++ e .NET
+    @{ Name = "VC++ 2008 Redistributable (x64)";     Id = "Microsoft.VCRedist.2008.x64" },
+    @{ Name = "VC++ 2008 Redistributable (x86)";     Id = "Microsoft.VCRedist.2008.x86" },
+    @{ Name = "VC++ 2010 Redistributable (x64)";     Id = "Microsoft.VCRedist.2010.x64" },
+    @{ Name = "VC++ 2010 Redistributable (x86)";     Id = "Microsoft.VCRedist.2010.x86" },
+    @{ Name = "VC++ 2012 Redistributable (x64)";     Id = "Microsoft.VCRedist.2012.x64" },
+    @{ Name = "VC++ 2012 Redistributable (x86)";     Id = "Microsoft.VCRedist.2012.x86" },
+    @{ Name = "VC++ 2013 Redistributable (x64)";     Id = "Microsoft.VCRedist.2013.x64" },
+    @{ Name = "VC++ 2013 Redistributable (x86)";     Id = "Microsoft.VCRedist.2013.x86" },
+    @{ Name = "VC++ 2015-2022 Redistributable (x64)";Id = "Microsoft.VCRedist.2015+.x64" },
+    @{ Name = "VC++ 2015-2022 Redistributable (x86)";Id = "Microsoft.VCRedist.2015+.x86" },
+    @{ Name = ".NET Desktop Runtime 6 (x64)";       Id = "Microsoft.DotNet.DesktopRuntime.6" },
+    @{ Name = ".NET Desktop Runtime 8 (x64)";       Id = "Microsoft.DotNet.DesktopRuntime.8" }
+)
+
+$total =$apps.Count
+$index = 0
+
+foreach ($app in $apps) {$percent = [math]::Round(($index / $total) * 100)
+
+    Write-Progress -Activity "Instalação em Lote de Aplicativos" `
+                   -Status "$($app.Name) ($($index + 1) de $total)" `
+                   -PercentComplete $percent
+
+    Write-Host "`n>>> Instalando: $($app.Name)..." -ForegroundColor Cyan
+
+    winget install --id $app.Id --exact --accept-package-agreements --accept-source-agreements --silent
+
+    $index++
+    Start-Sleep -Seconds 1
+}
+
+Write-Progress -Activity "Instalação em Lote de Aplicativos" -Completed
+Write-Host "`nTodos os aplicativos selecionados foram processados!" -ForegroundColor Green
