@@ -1,0 +1,2 @@
+Get-WinUserLanguageList |
+    Format-List LanguageTag, InputMethodTips
