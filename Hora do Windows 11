@@ -1,0 +1,14 @@
+w32tm /resync
+
+Stop-Service w32time -Force
+Start-Service w32time
+w32tm /config /update
+w32tm /resync
+
+w32tm /config /manualpeerlist:"pool.ntp.br" /syncfromflags:manual /reliable:yes /update
+Restart-Service w32time
+w32tm /resync
+
+w32tm /query /status
+
+w32tm /query /peers
