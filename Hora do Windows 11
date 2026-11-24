@@ -5,6 +5,9 @@ Start-Service w32time
 w32tm /config /update
 w32tm /resync
 
+Get-WinEvent -FilterHashtable @{LogName='System'; Id=12,6005,1; StartTime=(Get-Date).AddDays(-15)} | Select-Object TimeCreated, Id
+
+
 w32tm /config /manualpeerlist:"pool.ntp.br" /syncfromflags:manual /reliable:yes /update
 Restart-Service w32time
 w32tm /resync
